@@ -1,13 +1,11 @@
-type Chore = {
+declare type Chore = {
   id: string;
   name: string;
   assigned?: string;
 };
 
-type Person = {
+declare type Person = {
   id: string;
   name: string;
   chores: Array<Chore>;
 };
-
-export { Person, Chore };
