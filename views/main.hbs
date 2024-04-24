@@ -1,0 +1,44 @@
+<div id='app'>
+  <div class='header'>
+    <div class='title'>Chore Board</div>
+    <div class='btn-container'>
+      <div class='btn-segment side-a'></div>
+      <div class='btn-segment side-b'></div>
+      <div class='btn-segment side-c'></div>
+      <div class='btn-segment side-d'></div>
+      <i class='fa-solid fa-plus'></i>
+    </div>
+  </div>
+  <div id='dropdowns'>
+    <div id='add-chore-form' class='dropdown-container'>
+      <div class='form-container'>
+        <div class='btn-group'>
+          <button class='btn add'>Add</button>
+          <button class='btn cancel'>X</button>
+        </div>
+      </div>
+    </div>
+    <div id='add-dropdown' class='dropdown-container'>
+      <div class='btn-group'>
+        <button id='add-person' class='btn'>
+          <i class='fa-solid fa-user-plus'></i>
+          Add Person
+        </button>
+        <button disabled id='add-chore' class='btn disabled'>
+          <i class='fa-solid fa-broom'></i>
+          Add Chore
+        </button>
+      </div>
+    </div>
+    <div id='add-person-form' class='dropdown-container'>
+      <form class='form-container'>
+        <input name='person' placeholder='Name' type='text' required />
+        <div class='btn-group'>
+          <button class='btn add'>Add</button>
+          <button class='btn cancel'>X</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id='chores' class='chores'></div>
+</div>
