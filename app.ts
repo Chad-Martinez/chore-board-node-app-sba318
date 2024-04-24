@@ -12,6 +12,7 @@ app.engine(
   engine({
     layoutsDir: `${__dirname}/views/layouts`,
     extname: 'hbs',
+    partialsDir: `${__dirname}/views/partials/`,
   })
 );
 
