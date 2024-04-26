@@ -1,7 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { engine } from 'express-handlebars';
 import peopleRoutes from './routes/peopleRoutes';
+import choreRoutes from './routes/choreRoutes';
 import ErrorResponse from './classes/HttpResponseError';
+import { getDataFromFile } from './helpers/fileHelpers';
 
 const app = express();
 const port: number = 3000;
@@ -21,11 +23,23 @@ app.engine(
 
 app.use(express.static('public'));
 
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.render('main', { layout: 'index' });
+app.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const chores = await getDataFromFile('chores');
+    const people = await getDataFromFile('people');
+
+    res.render('main', {
+      layout: 'index',
+      choreOptions: { chores, people },
+      listExists: true,
+    });
+  } catch (error) {
+    next(new ErrorResponse(500, 'Internal Server Error'));
+  }
 });
 
 app.use('/api/people', peopleRoutes);
+app.use('/api/chores', choreRoutes);
 
 app.use(
   (

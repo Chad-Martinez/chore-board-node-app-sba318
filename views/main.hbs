@@ -34,8 +34,22 @@
     </div>
     <div id='add-chore-form' class='dropdown-container'>
       <div class='form-container'>
-        {{> peopleSelect}}
-        {{> choresSelect}}
+        <select id="chore-select" name="chore-select">
+          <option value="Choose a chore">Choose a chore</option>
+          {{#if listExists}}
+            {{#each choreOptions.chores}}
+              {{> choresSelect this=choreOptions.chores}}
+            {{/each}}
+          {{/if}}
+        </select>
+        <select id="chore-select" name="chore-select">
+          <option value="Assign it to...">Assign it to...</option>
+          {{#if listExists}}
+            {{#each choreOptions.people}}
+              {{> peopleSelect this=choreOptions.people}}
+            {{/each}}
+          {{/if}}
+        </select>
         <div class='btn-group'>
           <button class='btn add'>Add</button>
           <button class='btn cancel'>X</button>
