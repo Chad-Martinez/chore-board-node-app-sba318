@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import path from 'path';
-import { promises as fs, readFile, writeFile } from 'fs';
 import ErrorResponse from '../classes/HttpResponseError';
 import { getDataFromFile, writeDataToFile } from '../helpers/fileHelpers';
-
-const dir = path.dirname(__dirname);
 
 const getAllPeople = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const people = await getDataFromFile('people');
     res.json(people);
@@ -21,7 +17,11 @@ const getAllPeople = async (
   }
 };
 
-const addPerson = async (req: Request, res: Response, next: NextFunction) => {
+const addPerson = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const { name } = req.body;
   const person: Person = {
     id: Math.random().toString().slice(2),
@@ -30,10 +30,14 @@ const addPerson = async (req: Request, res: Response, next: NextFunction) => {
   };
 
   try {
-    const people = (await getDataFromFile('people')) as Array<Person>;
-    people.push(person);
-    await writeDataToFile('people', people);
-    console.log('File write successful');
+    const people: string | void = await getDataFromFile('people');
+    if (typeof people === 'string') {
+      const updatedPeople: Array<Person> = [person];
+      if (people !== '') {
+        updatedPeople.push(...JSON.parse(people));
+      }
+      await writeDataToFile('people', updatedPeople);
+    }
     res.status(201).send({ id: person.id });
   } catch (error) {
     next(new ErrorResponse(500, 'Internal Server Error'));

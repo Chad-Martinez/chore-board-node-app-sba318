@@ -3,11 +3,14 @@ import path from 'path';
 
 const dir = path.dirname(__dirname);
 
-export const getDataFromFile = async (
-  type: string
-): Promise<Array<Chore | Person>> => {
-  const data = await fs.readFile(path.join(dir, 'data', `${type}.json`));
-  return JSON.parse(data.toString());
+export const getDataFromFile = async (type: string): Promise<string | void> => {
+  try {
+    const data = await fs.readFile(path.join(dir, 'data', `${type}.json`));
+    return data.toString();
+  } catch (error) {
+    console.log('Error reading file ', error);
+    throw error;
+  }
 };
 
 export const writeDataToFile = async (
@@ -20,7 +23,8 @@ export const writeDataToFile = async (
       JSON.stringify(content)
     );
   } catch (error) {
-    console.log(error);
+    console.log('Error writing to file ', error);
+    throw error;
   }
 };
 
