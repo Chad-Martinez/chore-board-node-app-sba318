@@ -10,14 +10,7 @@
     </div>
   </div>
   <div id='dropdowns'>
-    <div id='add-chore-form' class='dropdown-container'>
-      <div class='form-container'>
-        <div class='btn-group'>
-          <button class='btn add'>Add</button>
-          <button class='btn cancel'>X</button>
-        </div>
-      </div>
-    </div>
+
     <div id='add-dropdown' class='dropdown-container'>
       <div class='btn-group'>
         <button id='add-person' class='btn'>
@@ -38,6 +31,16 @@
           <button class='btn cancel'>X</button>
         </div>
       </form>
+    </div>
+    <div id='add-chore-form' class='dropdown-container'>
+      <div class='form-container'>
+        {{> peopleSelect}}
+        {{> choresSelect}}
+        <div class='btn-group'>
+          <button class='btn add'>Add</button>
+          <button class='btn cancel'>X</button>
+        </div>
+      </div>
     </div>
   </div>
   <div id='chores' class='chores'></div>

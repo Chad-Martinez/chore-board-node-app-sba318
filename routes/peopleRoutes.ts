@@ -5,4 +5,6 @@ const router = Router();
 
 router.get('/', peopleController.getAllPeople);
 
+router.post('/', peopleController.addPerson);
+
 export default module.exports = router;
