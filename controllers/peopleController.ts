@@ -1,22 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
 import path from 'path';
-import fs, { readFile, writeFile } from 'fs';
+import { promises as fs, readFile, writeFile } from 'fs';
 import ErrorResponse from '../classes/HttpResponseError';
+import { getDataFromFile, writeDataToFile } from '../helpers/fileHelpers';
 
 const dir = path.dirname(__dirname);
 
-const getAllPeople = (req: Request, res: Response, next: NextFunction) => {
-  readFile(`${dir}/data/people.json`, 'utf-8', (error, data) => {
+const getAllPeople = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const people = await getDataFromFile('people');
+    res.json(people);
+  } catch (error) {
     if (error) {
       next(new ErrorResponse(500, 'Internal Server Error'));
-    } else {
-      const people = JSON.parse(data);
-      res.json(people);
     }
-  });
+  }
 };
 
-const addPerson = (req: Request, res: Response, next: NextFunction) => {
+const addPerson = async (req: Request, res: Response, next: NextFunction) => {
   const { name } = req.body;
   const person: Person = {
     id: Math.random().toString().slice(2),
@@ -24,23 +29,15 @@ const addPerson = (req: Request, res: Response, next: NextFunction) => {
     chores: [],
   };
 
-  readFile(`${dir}/data/people.json`, 'utf-8', (error, data) => {
-    if (error) {
-      next(new ErrorResponse(500, 'Internal Server Error'));
-    } else {
-      const people = JSON.parse(data);
-      people.push(person);
-
-      writeFile(`${dir}/data/people.json`, JSON.stringify(people), (error) => {
-        if (error) {
-          next(new ErrorResponse(500, 'Internal Server Error'));
-        } else {
-          console.log('File write successful');
-          res.status(201).send({ id: person.id });
-        }
-      });
-    }
-  });
+  try {
+    const people = (await getDataFromFile('people')) as Array<Person>;
+    people.push(person);
+    await writeDataToFile('people', people);
+    console.log('File write successful');
+    res.status(201).send({ id: person.id });
+  } catch (error) {
+    next(new ErrorResponse(500, 'Internal Server Error'));
+  }
 };
 
 export default {
