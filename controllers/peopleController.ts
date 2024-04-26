@@ -6,7 +6,14 @@ import ErrorResponse from '../classes/HttpResponseError';
 const dir = path.dirname(__dirname);
 
 const getAllPeople = (req: Request, res: Response, next: NextFunction) => {
-  res.json({ id: '1', name: 'Chad' });
+  readFile(`${dir}/data/people.json`, 'utf-8', (error, data) => {
+    if (error) {
+      next(new ErrorResponse(500, 'Internal Server Error'));
+    } else {
+      const people = JSON.parse(data);
+      res.json(people);
+    }
+  });
 };
 
 const addPerson = (req: Request, res: Response, next: NextFunction) => {
