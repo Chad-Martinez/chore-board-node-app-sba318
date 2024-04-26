@@ -12,6 +12,15 @@ type Person = {
   chores: Array<Chore>;
 };
 
+const people: Array<Person> = [];
+
+(async (): Promise<void> => {
+  const { data } = await axios.get('http://localhost:3000/api/people');
+  people.push(...data);
+})();
+
+console.log('people loaded ', people);
+
 const headerAddButton = document.querySelector(
   '.btn-container'
 )! as HTMLDivElement;
@@ -31,20 +40,13 @@ const addPersonForm = document.getElementById(
 )! as HTMLDivElement;
 addPersonForm.style.left = `${window.innerWidth}px`;
 
-const handleToggleMenu = async (): Promise<void> => {
-  const response = await axios.get('http://localhost:3000/api/people');
-  console.log('response', response);
-
-  // const addItemDropdown = document.getElementById(
-  //   'add-dropdown'
-  // )! as HTMLDivElement;
-
+const handleToggleMenu = (): void => {
   const btnGroup = addItemDropdown.firstElementChild as HTMLDivElement;
   const choreBtn = btnGroup.lastElementChild as HTMLButtonElement;
-  const addPersonForm = document.getElementById(
-    'add-person-form'
-  )! as HTMLDivElement;
-  const people: Array<Person> = [];
+  // const addPersonForm = document.getElementById(
+  //   'add-person-form'
+  // )! as HTMLDivElement;
+  // const people: Array<Person> = [];
 
   if (choreBtn.classList.contains('disabled') && people.length > 0) {
     choreBtn.classList.remove('disabled');
@@ -129,10 +131,12 @@ const handleAddPersonEvent = async (event: MouseEvent): Promise<void> => {
         // Replace alert with error div
         if (!personName) return alert('Must enter a name');
 
-        const response = await axios.post('http://localhost:3000/api/people', {
+        const { data } = await axios.post('http://localhost:3000/api/people', {
           name: personName,
         });
-        console.log('response add name ', response);
+        people.push({ id: data.id, name: personName, chores: [] });
+        console.log('response add name ', data);
+        console.log('people ', people);
         personInput.value = '';
       } catch (error) {
         alert('Error adding person. Please try again');
