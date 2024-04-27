@@ -27,12 +27,18 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const chores = await getDataFromFile('chores');
     const people = await getDataFromFile('people');
+    if (typeof chores === 'string' && typeof people === 'string') {
+      const selectOptions = {
+        chores: JSON.parse(chores),
+        people: JSON.parse(people),
+      };
 
-    res.render('main', {
-      layout: 'index',
-      choreOptions: { chores, people },
-      listExists: true,
-    });
+      res.render('main', {
+        layout: 'index',
+        options: selectOptions,
+        listExists: true,
+      });
+    }
   } catch (error) {
     next(new ErrorResponse(500, 'Internal Server Error'));
   }
