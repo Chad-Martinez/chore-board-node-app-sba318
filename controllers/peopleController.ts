@@ -9,6 +9,7 @@ export const getAllPeople = async (
 ): Promise<void> => {
   try {
     const people = await getDataFromFile('people');
+
     res.json(people);
   } catch (error) {
     if (error) {

@@ -76,7 +76,17 @@ const handleToggleMenu = (): void => {
   }
 };
 
-const handleAddEvent = (event: MouseEvent): void => {
+const handleAddEvent = async (event: MouseEvent): Promise<void> => {
+  try {
+    const { data: peopleData } = await axios.get(`${API_ENDPOINT}/people`);
+    const { data: choreData } = await axios.get(`${API_ENDPOINT}/chores`);
+
+    people.push(...peopleData);
+    chores.push(...choreData);
+    console.log('people ', people, 'chores ', chores);
+  } catch (error) {
+    console.error('Error loading initial data ', error);
+  }
   if (event.target instanceof HTMLButtonElement) {
     const button: HTMLButtonElement = event.target;
     if (button.id == 'add-person') {
@@ -148,33 +158,6 @@ const handlePersonTransition = (event: TransitionEvent) => {
     addPersonForm.removeAttribute('data-trigger');
   }
 };
-
-// const renderSelect = (
-//   selectOptions: Array<Chore> | Array<Person>,
-//   selectType: string
-// ): HTMLSelectElement => {
-//   const select: HTMLSelectElement = document.createElement('select');
-//   select.setAttribute('id', `${selectType}-select`);
-//   select.setAttribute('name', `${selectType}-select`);
-
-//   const selectionOptions: Array<HTMLOptionElement> = [];
-//   const singleOption: HTMLOptionElement = document.createElement('option');
-//   singleOption.value =
-//     selectType == 'chore' ? 'Choose a chore' : 'Assign it to...';
-//   singleOption.textContent =
-//     selectType == 'chore' ? 'Choose a chore' : 'Assign it to...';
-//   selectionOptions.push(singleOption);
-
-//   selectOptions.forEach((option) => {
-//     const singleOption: HTMLOptionElement = document.createElement('option');
-//     singleOption.setAttribute('value', option.name);
-//     singleOption.setAttribute('id', option.id);
-//     singleOption.textContent = option.name;
-//     selectionOptions.push(singleOption);
-//   });
-//   select.append(...selectionOptions);
-//   return select;
-// };
 
 const handleAssignChore = async (event: MouseEvent) => {
   event.preventDefault();
