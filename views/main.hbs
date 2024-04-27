@@ -37,16 +37,16 @@
         <select id="chore-select" name="chore-select">
           <option value="Choose a chore">Choose a chore</option>
           {{#if listExists}}
-            {{#each choreOptions.chores}}
-              {{> choresSelect this=choreOptions.chores}}
+            {{#each options.chores}}
+              {{> choresSelect this=.}}
             {{/each}}
           {{/if}}
         </select>
-        <select id="chore-select" name="chore-select">
+        <select id="person-select" name="person-select">
           <option value="Assign it to...">Assign it to...</option>
           {{#if listExists}}
-            {{#each choreOptions.people}}
-              {{> peopleSelect this=choreOptions.people}}
+            {{#each options.people}}
+              {{> peopleSelect this=options.people}}
             {{/each}}
           {{/if}}
         </select>
