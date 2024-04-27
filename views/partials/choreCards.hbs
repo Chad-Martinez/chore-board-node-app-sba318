@@ -1,0 +1,8 @@
+<div class="chores__card">
+    <div id="{{this.id}}" class="title">{{this.name}}</div>
+    <ul>
+        {{#each this.chores}}
+            {{> choreCardListItem this=this.chores}}
+        {{/each}}
+    </ul>
+</div>

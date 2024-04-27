@@ -57,5 +57,11 @@
       </div>
     </div>
   </div>
-  <div id='chores' class='chores'></div>
+  <div id='chores' class='chores'>
+    {{#if listExists}}
+      {{#each options.filteredPeople}}
+        {{> choreCards this=options.filteredPeople}}
+      {{/each}}
+    {{/if}}
+  </div>
 </div>

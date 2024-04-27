@@ -25,19 +25,26 @@ app.use(express.static('public'));
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const chores = await getDataFromFile('chores');
-    const people = await getDataFromFile('people');
-    
-    const selectOptions = {
-      chores,
-      people,
-    };
-    res.render('main', {
-      layout: 'index',
-      options: selectOptions,
-      listExists: true,
-    });
-    
+    const chores = (await getDataFromFile('chores')) as Array<Chore>;
+    const people = (await getDataFromFile('people')) as Array<Person>;
+
+    if (people && Array.isArray(people)) {
+      const filteredPeople = people.filter((person: Person | undefined) => {
+        if (!undefined && person && person.chores.length > 0) {
+          return person;
+        }
+      });
+      const selectOptions = {
+        chores,
+        people,
+        filteredPeople,
+      };
+      res.render('main', {
+        layout: 'index',
+        options: selectOptions,
+        listExists: true,
+      });
+    }
   } catch (error) {
     next(new ErrorResponse(500, 'Internal Server Error'));
   }
@@ -53,7 +60,7 @@ app.use(
     res: Response,
     next: NextFunction
   ): void => {
-    console.log('Error handling middleware ', error);
+    console.error('Error handling middleware ', error);
     res.status(error.status || 500);
     res.json({ error: error.message });
   }
