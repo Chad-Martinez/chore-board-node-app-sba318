@@ -1,5 +1,7 @@
 import axios from 'axios';
+import { validatePerson, validateSelections } from '../helpers/validators';
 
+const API_ENDPOINT = 'http://localhost:3000/api';
 type Chore = {
   id: string;
   name: string;
@@ -13,13 +15,20 @@ type Person = {
 };
 
 const people: Array<Person> = [];
+const chores: Array<Chore> = [];
 
 (async (): Promise<void> => {
-  const { data } = await axios.get('http://localhost:3000/api/people');
-  people.push(...data);
-})();
+  try {
+    const { data: peopleData } = await axios.get(`${API_ENDPOINT}/people`);
+    const { data: choreData } = await axios.get(`${API_ENDPOINT}/chores`);
 
-console.log('people loaded ', people);
+    people.push(...peopleData);
+    chores.push(...choreData);
+    console.log('people ', people, 'chores ', chores);
+  } catch (error) {
+    console.error('Error loading initial data ', error);
+  }
+})();
 
 const headerAddButton = document.querySelector(
   '.btn-container'
@@ -43,14 +52,10 @@ addPersonForm.style.left = `${window.innerWidth}px`;
 const handleToggleMenu = (): void => {
   const btnGroup = addItemDropdown.firstElementChild as HTMLDivElement;
   const choreBtn = btnGroup.lastElementChild as HTMLButtonElement;
-  // const addPersonForm = document.getElementById(
-  //   'add-person-form'
-  // )! as HTMLDivElement;
-  // const people: Array<Person> = [];
+  choreBtn.classList.remove('disabled');
+  choreBtn.disabled = false;
 
   if (choreBtn.classList.contains('disabled') && people.length > 0) {
-    choreBtn.classList.remove('disabled');
-    choreBtn.disabled = false;
   }
   if (people.length <= 0 && !choreBtn.classList.contains('disabled')) {
     choreBtn.classList.add('disabled');
@@ -74,9 +79,6 @@ const handleToggleMenu = (): void => {
 const handleAddEvent = (event: MouseEvent): void => {
   if (event.target instanceof HTMLButtonElement) {
     const button: HTMLButtonElement = event.target;
-    const addItemDropdown = document.getElementById(
-      'add-dropdown'
-    )! as HTMLDivElement;
     if (button.id == 'add-person') {
       addItemDropdown.setAttribute('data-trigger', button.id);
       addItemDropdown.style.left = `${window.innerWidth}px`;
@@ -90,15 +92,6 @@ const handleAddEvent = (event: MouseEvent): void => {
 
 const handleMenuTransition = (event: TransitionEvent) => {
   if (event.target instanceof HTMLDivElement) {
-    const addItemDropdown = document.getElementById(
-      'add-dropdown'
-    )! as HTMLDivElement;
-    const addPersonForm = document.getElementById(
-      'add-person-form'
-    )! as HTMLDivElement;
-    const addChoreForm = document.getElementById(
-      'add-chore-form'
-    )! as HTMLDivElement;
     const { trigger } = event.target.dataset;
     if (trigger == 'add-person') {
       addPersonForm.style.left = `${
@@ -117,9 +110,6 @@ const handleMenuTransition = (event: TransitionEvent) => {
 const handleAddPersonEvent = async (event: MouseEvent): Promise<void> => {
   event.preventDefault();
   if (event.target instanceof HTMLButtonElement) {
-    const addPersonForm = document.getElementById(
-      'add-person-form'
-    )! as HTMLDivElement;
     if (event.target.classList.contains('cancel')) {
       addPersonForm.style.left = `${window.innerWidth}px`;
     } else {
@@ -127,20 +117,18 @@ const handleAddPersonEvent = async (event: MouseEvent): Promise<void> => {
         const personInput: HTMLInputElement =
           addPersonForm.getElementsByTagName('input')[0];
         const personName: string = personInput.value.trim();
+        const isValid: Promise<boolean> = validatePerson(personName);
 
-        // Replace alert with error div
-        if (!personName) return alert('Must enter a name');
+        if (!isValid) return;
 
-        const { data } = await axios.post('http://localhost:3000/api/people', {
+        const { data } = await axios.post(`${API_ENDPOINT}/people`, {
           name: personName,
         });
         people.push({ id: data.id, name: personName, chores: [] });
-        console.log('response add name ', data);
-        console.log('people ', people);
         personInput.value = '';
       } catch (error) {
         alert('Error adding person. Please try again');
-        console.log('try catch error ', error);
+        console.error('Error adding person: ', error);
       }
     }
   }
@@ -149,9 +137,6 @@ const handleAddPersonEvent = async (event: MouseEvent): Promise<void> => {
 const handlePersonTransition = (event: TransitionEvent) => {
   if (event.target instanceof HTMLDivElement) {
     const { trigger } = event.target.dataset;
-    const addPersonForm = document.getElementById(
-      'add-person-form'
-    )! as HTMLDivElement;
     const addChoreForm = document.getElementById(
       'add-chore-form'
     )! as HTMLDivElement;
@@ -164,36 +149,67 @@ const handlePersonTransition = (event: TransitionEvent) => {
   }
 };
 
-const handleAddChore = (event: MouseEvent) => {
+// const renderSelect = (
+//   selectOptions: Array<Chore> | Array<Person>,
+//   selectType: string
+// ): HTMLSelectElement => {
+//   const select: HTMLSelectElement = document.createElement('select');
+//   select.setAttribute('id', `${selectType}-select`);
+//   select.setAttribute('name', `${selectType}-select`);
+
+//   const selectionOptions: Array<HTMLOptionElement> = [];
+//   const singleOption: HTMLOptionElement = document.createElement('option');
+//   singleOption.value =
+//     selectType == 'chore' ? 'Choose a chore' : 'Assign it to...';
+//   singleOption.textContent =
+//     selectType == 'chore' ? 'Choose a chore' : 'Assign it to...';
+//   selectionOptions.push(singleOption);
+
+//   selectOptions.forEach((option) => {
+//     const singleOption: HTMLOptionElement = document.createElement('option');
+//     singleOption.setAttribute('value', option.name);
+//     singleOption.setAttribute('id', option.id);
+//     singleOption.textContent = option.name;
+//     selectionOptions.push(singleOption);
+//   });
+//   select.append(...selectionOptions);
+//   return select;
+// };
+
+const handleAssignChore = async (event: MouseEvent) => {
+  event.preventDefault();
   if (event.target instanceof HTMLButtonElement) {
     const button: HTMLButtonElement = event.target;
-    // const addChoreForm = document.getElementById(
-    //   'add-chore-form'
-    // )! as HTMLDivElement;
+
     if (button.classList.contains('cancel')) {
       addChoreForm.style.left = `${window.innerWidth}px`;
     } else {
-      // const isValid: boolean = validateSelections(addChoreForm);
-      // if (isValid) {
-      //   const errors: NodeListOf<HTMLDivElement> =
-      //     addChoreForm.querySelectorAll('.error');
-      //   errors && errors.forEach((error) => error.remove());
-      //   const selectInputs = document.getElementsByTagName(
-      //     'select'
-      //   ) as HTMLCollectionOf<HTMLSelectElement>;
-      //   const people = App.people();
-      //   const person: Person | undefined = people.find(
-      //     (person) => person.id == selectInputs[1].selectedOptions[0].id
-      //   );
-      //   selectInputs[1].value = 'Assign it to...';
-      //   const chore: Chore | undefined = CHORE_LIST.find(
-      //     (chore) => chore.id == selectInputs[0].selectedOptions[0].id
-      //   );
-      //   selectInputs[0].value = 'Choose a chore';
-      //   chore && person?.addChore(chore);
-      //   App.renderChoreCards(people);
-      //   addChoreForm.style.left = `${window.innerWidth}px`;
-      // }
+      const isValid: boolean = validateSelections(addChoreForm);
+      if (isValid) {
+        const errors: NodeListOf<HTMLDivElement> =
+          addChoreForm.querySelectorAll('.error');
+        errors && errors.forEach((error) => error.remove());
+        const selectInputs = document.getElementsByTagName(
+          'select'
+        ) as HTMLCollectionOf<HTMLSelectElement>;
+        const person: Person | undefined = people.find(
+          (person) => person.id == selectInputs[1].selectedOptions[0].id
+        );
+        selectInputs[1].value = 'Assign it to...';
+        const chore: Chore | undefined = chores.find(
+          (chore) => chore.id == selectInputs[0].selectedOptions[0].id
+        );
+        if (chore) person?.chores.push(chore);
+        selectInputs[0].value = 'Choose a chore';
+        try {
+          await axios.put(`${API_ENDPOINT}/people`, {
+            person: person,
+          });
+        } catch (error) {
+          alert(error.message);
+        }
+        addChoreForm.style.left = `${window.innerWidth}px`;
+      }
     }
   }
 };
@@ -203,4 +219,4 @@ addItemDropdown.addEventListener('transitionend', handleMenuTransition);
 addItemDropdown.addEventListener('click', handleAddEvent);
 addPersonForm.addEventListener('click', handleAddPersonEvent);
 addPersonForm.addEventListener('transitionend', handlePersonTransition);
-addChoreForm.addEventListener('click', handleAddChore);
+addChoreForm.addEventListener('click', handleAssignChore);

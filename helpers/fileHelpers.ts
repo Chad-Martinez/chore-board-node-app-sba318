@@ -3,10 +3,14 @@ import path from 'path';
 
 const dir = path.dirname(__dirname);
 
-export const getDataFromFile = async (type: string): Promise<string | void> => {
+export const getDataFromFile = async (
+  type: string
+): Promise<Array<Person> | void> => {
   try {
     const data = await fs.readFile(path.join(dir, 'data', `${type}.json`));
-    return data.toString();
+    if (typeof data.toString() === 'string') {
+      return JSON.parse(data.toString());
+    }
   } catch (error) {
     console.log('Error reading file ', error);
     throw error;
